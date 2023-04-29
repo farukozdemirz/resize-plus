@@ -1,11 +1,10 @@
-import path from 'path';
 import typescript from 'rollup-plugin-typescript2';
-import { nodeResolve } from '@rollup/plugin-node-resolve';
+import resolve from '@rollup/plugin-node-resolve';
 import { terser } from 'rollup-plugin-terser';
-import babel from 'rollup-plugin-babel';
 import commonjs from '@rollup/plugin-commonjs';
-
-const fullSrcPath = path.resolve('src');
+import css from "rollup-plugin-import-css";
+import peerDepsExternal from "rollup-plugin-peer-deps-external";
+import babel from 'rollup-plugin-babel';
 
 export default {
   input: 'src/index.tsx',
@@ -25,22 +24,22 @@ export default {
   ],
   preserveModules: true,
   plugins: [
+    peerDepsExternal(),
     typescript({
       tsconfig: 'tsconfig.json',
       useTsconfigDeclarationDir: true
     }),
     babel({
-      exclude: 'node_modules/**',
-      extensions: ['.js', '.jsx', '.ts', '.tsx'],
-      presets: [
-        '@babel/preset-env',
-        '@babel/preset-react',
-        '@babel/preset-typescript',
-      ],
+      babelHelpers: "runtime",
+      plugins: ["@babel/plugin-transform-runtime"],
     }),
-    nodeResolve({ jail: fullSrcPath }),
+    resolve(),
     commonjs(),
+    css({
+      minify: true,
+      output: 'style.css'
+    }),
     terser(),
   ],
-  external: ['react', 'react-dom'],
+  external: ["react", "react-dom"],
 };
