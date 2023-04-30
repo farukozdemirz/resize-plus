@@ -24,9 +24,9 @@ export interface ResizerProps {
   onResizeStart: () => void;
   onResizeEnd: () => void;
   onResize: () => void;
-  onRotateStart: (e: any) => void;
-  onRotateEnd: () => void;
-  onRotate: () => void;
+  onRotateStart: (e: MouseEvent | TouchEvent) => void;
+  onRotateEnd: (e: MouseEvent | TouchEvent, style: IStyle) => void;
+  onRotate: (e: MouseEvent | TouchEvent, style: IStyle) => void;
   isHideOnResize: boolean;
   onResizerHide: () => void;
   onResizerShown: () => void;
@@ -35,4 +35,11 @@ export interface ResizerProps {
   children: React.ReactNode;
   zoom: number;
   isLocked?: boolean;
+}
+
+export type ActionType = "rotate-start" | "rotate" | "rotate-end";
+export interface IAction {
+  type: ActionType;
+  event: MouseEvent | TouchEvent;
+  style?: IStyle;
 }
