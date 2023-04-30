@@ -18,22 +18,21 @@ export interface IStyle {
 export interface ResizerProps {
   minWidth?: number;
   minHeight?: number;
-  aspectRatio: string;
-  resizeFromCenter: boolean;
-  lockAspectRatio: boolean;
-  onResizeStart: () => void;
-  onResizeEnd: () => void;
-  onResize: () => void;
-  onRotateStart: (e: MouseEvent | TouchEvent) => void;
-  onRotateEnd: (e: MouseEvent | TouchEvent, style: IStyle) => void;
-  onRotate: (e: MouseEvent | TouchEvent, style: IStyle) => void;
-  isHideOnResize: boolean;
-  onResizerHide: () => void;
-  onResizerShown: () => void;
-  enable: Enable;
+  aspectRatio?: string;
+  resizeFromCenter?: boolean;
+  lockAspectRatio?: boolean;
+  onResizeStart?: () => void;
+  onResizeEnd?: () => void;
+  onResize?: () => void;
+  onRotateStart?: (e: MouseEvent | TouchEvent) => void;
+  onRotateEnd?: (e: MouseEvent | TouchEvent, style: IStyle) => void;
+  onRotate?: (e: MouseEvent | TouchEvent, style: IStyle) => void;
+  isHideOnResize?: boolean;
+  onResizerHide?: () => void;
+  onResizerShown?: () => void;
+  enable?: Enable;
   style: IStyle;
-  children: React.ReactNode;
-  zoom: number;
+  zoom?: number;
   isLocked?: boolean;
 }
 

@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import '../style.css';
 
 const Resizer = ({
-  children,
   minWidth = 40,
   minHeight = 40,
   style,
@@ -26,13 +25,10 @@ const Resizer = ({
   const { width, height, left, top, angle } = styleValue;
 
   const handleMouseUp = (e: MouseEvent | TouchEvent) => {
-    e.stopPropagation();
-    e.type === 'mouseup' && e.preventDefault();
     window.removeEventListener('mousemove', handleMouseMove);
     window.removeEventListener('mouseup', handleMouseUp);
     window.removeEventListener('touchmove', handleMouseMove);
     window.removeEventListener('touchend', handleMouseUp);
-
     setStyleValue((prevStyle) => {
       handleAction({
         type: `${targetRef.current?.dataset.id}-end` as ActionType,
@@ -135,10 +131,16 @@ const Resizer = ({
         <div className='handler-left' />
         <div className='handler-top-right' />
         <div className='handler-top-left' />
-        <div className='handler-bottom-right' />
-        <div className='handler-bottom-left' />
-        <div className='handler-rotate' data-id="rotate" />
-        {children}
+        <div
+          className='handler-bottom-right'
+        />
+        <div
+          className='handler-bottom-left'
+        />
+        <div
+          className='handler-rotate'
+          data-id="rotate"
+        />
       </div>
     </>
   );
