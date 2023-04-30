@@ -23,7 +23,7 @@ const Resizer: React.FC<ResizerProps> = ({
   const { width, height, left, top, angle } = styleValue;
 
   useEffect(() => {
-    const handleMouseMove = (e: any | any) => {
+    const handleMouseMove = (e: any) => {
       e.stopPropagation();
       e.type === 'mousemove' && e.preventDefault();
 
@@ -32,6 +32,11 @@ const Resizer: React.FC<ResizerProps> = ({
       let cx = style.left + style.width / 2;
       let cy = style.top + style.height / 2;
       let angle = style.angle;
+
+      if (e.type === 'touchmove') {
+        X = e.touches[0].clientX + document.body.scrollLeft;
+        Y = e.touches[0].clientY + document.body.scrollTop;
+      }
 
       if (targetRef.current?.className === 'handler-rotate') {
         angle = Math.atan2(cx - X, -(cy - Y)) * (180 / Math.PI) - 180;
