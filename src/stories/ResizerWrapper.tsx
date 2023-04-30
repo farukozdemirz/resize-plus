@@ -8,8 +8,9 @@ const ResizerWrapper = () => {
     left: 500,
     top: 200,
     angle: 0,
+    transformOrigin: 'center',
   })
-  const { width, height, left, top, angle } = style
+  const { width, height, left, top, angle, transformOrigin } = style
   return (
     <>
       <Resizer
@@ -29,6 +30,7 @@ const ResizerWrapper = () => {
           left,
           top,
           transform: `rotate(${angle}deg)`,
+          transformOrigin,
           background: '#000',
         }}
       >

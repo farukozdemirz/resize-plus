@@ -14,6 +14,7 @@ export interface IStyle {
   left: number;
   top: number;
   angle: number;
+  transformOrigin: string;
 }
 export interface ResizerProps {
   minWidth?: number;
