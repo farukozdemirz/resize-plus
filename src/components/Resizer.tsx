@@ -1,20 +1,78 @@
 import { ResizerProps, IStyle } from '@/types';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import '../style.css';
 
 const Resizer: React.FC<ResizerProps> = ({
   children,
   minWidth = 40,
-  minHeight = 40
+  minHeight = 40,
+  style,
+  isLocked
 }) => {
-  const [styleValue] = useState<IStyle>({
-    width: minWidth,
-    height: minHeight,
-    left: 0,
-    top: 0,
-    angle: 0,
+  const resizerRef = useRef<HTMLDivElement>(null);
+  let targetRef = useRef<HTMLDivElement>(null);
+
+  const [styleValue, setStyleValue] = useState<IStyle>({
+    width: style.width || minWidth,
+    height: style.height || minHeight,
+    left: style.left || 0,
+    top: style.top || 0,
+    angle: style.angle || 0,
   })
+
   const { width, height, left, top, angle } = styleValue;
+
+  useEffect(() => {
+    const handleMouseMove = (e: any | any) => {
+      e.stopPropagation();
+      e.type === 'mousemove' && e.preventDefault();
+
+      let X = e.clientX + document.body.scrollLeft;
+      let Y = e.clientY + document.body.scrollTop;
+      let cx = style.left + style.width / 2;
+      let cy = style.top + style.height / 2;
+      let angle = style.angle;
+
+      if (targetRef.current?.className === 'handler-rotate') {
+        angle = Math.atan2(cx - X, -(cy - Y)) * (180 / Math.PI) - 180;
+        angle = angle >= 0 ? angle : 360 + angle;
+        setStyleValue((prev) => ({
+          ...prev,
+          angle
+        }))
+      }
+    }
+
+    const handleMouseUp = (e: MouseEvent | TouchEvent) => {
+      e.stopPropagation();
+      e.type === 'mouseup' && e.preventDefault();
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('touchmove', handleMouseMove);
+      window.removeEventListener('touchend', handleMouseUp);
+    }
+
+    const handleMouseDown = (e: any) => {
+      e.stopPropagation();
+      targetRef = { current: e.target };
+
+      if (!isLocked) {
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseup', handleMouseUp);
+        window.addEventListener('touchmove', handleMouseMove);
+        window.addEventListener('touchend', handleMouseUp);
+      }
+    };
+
+    resizerRef.current?.addEventListener('mousedown', handleMouseDown);
+    resizerRef.current?.addEventListener('touchstart', handleMouseDown);
+    return () => {
+      resizerRef.current?.removeEventListener('mousedown', handleMouseDown);
+      resizerRef.current?.removeEventListener('touchstart', handleMouseDown);
+    };
+  }, []);
+
+
   return (
     <>
       <div style={{
@@ -23,7 +81,9 @@ const Resizer: React.FC<ResizerProps> = ({
         left,
         top,
         transform: `rotate(${angle}deg)`,
-      }} className='resizer-container'>
+      }}
+        className='resizer-container'
+        ref={resizerRef}>
         <div className='resizer-border' />
         <div className='handler-top' />
         <div className='handler-bottom' />
@@ -36,8 +96,6 @@ const Resizer: React.FC<ResizerProps> = ({
         <div className='handler-rotate' />
         {children}
       </div>
-      <div className="rotator-angle-div" />
-      <div className="resizer-target-hover-line" />
     </>
   );
 };
