@@ -23,7 +23,7 @@ export interface ResizerProps {
   lockAspectRatio?: boolean;
   onResizeStart?: () => void;
   onResizeEnd?: () => void;
-  onResize?: () => void;
+  onResize?: (e: MouseEvent | TouchEvent, style: IStyle) => void;
   onRotateStart?: (e: MouseEvent | TouchEvent) => void;
   onRotateEnd?: (e: MouseEvent | TouchEvent, style: IStyle) => void;
   onRotate?: (e: MouseEvent | TouchEvent, style: IStyle) => void;
@@ -36,9 +36,9 @@ export interface ResizerProps {
   isLocked?: boolean;
 }
 
-export type ActionType = "rotate-start" | "rotate" | "rotate-end";
+export type ActionType = "rotate-start" | "rotate" | "rotate-end" | "resize-start" | "resize" | "resize-end";
 export interface IAction {
   type: ActionType;
   event: MouseEvent | TouchEvent;
-  style?: IStyle;
 }
+export type Direction = 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | "bottom-right" | "bottom-left";

@@ -5,7 +5,7 @@ const ResizerWrapper = () => {
   const [style, setStyle] = useState({
     width: 200,
     height: 200,
-    left: 500,
+    left: 300,
     top: 200,
     angle: 0,
   })
@@ -17,6 +17,9 @@ const ResizerWrapper = () => {
         onRotateStart={(e) => { }}
         onRotateEnd={(e) => { }}
         onRotate={(e, newStyle) => {
+          setStyle(newStyle)
+        }}
+        onResize={(e, newStyle) => {
           setStyle(newStyle)
         }}
         isLocked={false}
