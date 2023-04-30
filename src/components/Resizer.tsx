@@ -2,13 +2,13 @@ import { ResizerProps, IStyle } from '@/types';
 import React, { useEffect, useRef, useState } from 'react';
 import '../style.css';
 
-const Resizer: React.FC<ResizerProps> = ({
+const Resizer = ({
   children,
   minWidth = 40,
   minHeight = 40,
   style,
   isLocked
-}) => {
+}: ResizerProps) => {
   const resizerRef = useRef<HTMLDivElement>(null);
   let targetRef = useRef<HTMLDivElement>(null);
 
