@@ -28,7 +28,7 @@ const Resizer = ({
     transformOrigin: style.transformOrigin || 'center',
   })
 
-  const { width, height, left, top, angle,transformOrigin } = styleValueRef.current;
+  const { width, height, left, top, angle, transformOrigin } = styleValueRef.current;
 
   const handleMouseUp = (e: MouseEvent | TouchEvent) => {
     window.removeEventListener('mousemove', handleMouseMove);
@@ -46,7 +46,8 @@ const Resizer = ({
     newAngle = newAngle >= 0 ? newAngle : 360 + newAngle;
     styleValueRef.current = {
       ...styleValueRef.current,
-      angle: newAngle
+      angle: newAngle,
+      transformOrigin:`${width / 2}px ${height / 2}px`
     }
     handleAction({
       type: "rotate",
@@ -252,7 +253,7 @@ const Resizer = ({
   const handleAction = (action: IAction) => {
     switch (action.type) {
       case "rotate-start":
-        onRotateStart(action.event)
+        onRotateStart(action.event, styleValueRef.current)
         break;
       case "rotate":
         onRotate(action.event, styleValueRef.current)
