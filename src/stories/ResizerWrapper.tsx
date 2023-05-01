@@ -3,21 +3,26 @@ import React, { useState } from 'react'
 
 const ResizerWrapper = () => {
   const [style, setStyle] = useState({
-    width: 200,
-    height: 200,
-    left: 500,
-    top: 200,
-    angle: 0,
+    width: 300,
+    height: 300,
+    left: 300,
+    top: 300,
+    angle: 20,
     transformOrigin: 'center',
   })
   const { width, height, left, top, angle, transformOrigin } = style
   return (
     <>
       <Resizer
-        style={style}
-        onRotateStart={(e, newStyle) => { setStyle(newStyle) }}
-        onRotateEnd={(e, newStyle) => { setStyle(newStyle) }}
-        onRotate={(e, newStyle) => { setStyle(newStyle) }}
+       style={style}
+        onRotateStart={(e) => { }}
+        onRotateEnd={(e) => { }}
+        onRotate={(e, newStyle) => {
+          setStyle(newStyle)
+        }}
+        onResize={(e, newStyle) => {
+          setStyle(newStyle)
+        }}
         isLocked={false}
       />
       <div

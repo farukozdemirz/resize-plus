@@ -1,6 +1,8 @@
-import { ResizerProps, IStyle, IAction, ActionType } from '@/types';
-import React, { useEffect, useRef, useState } from 'react';
+import { ResizerProps, IStyle, IAction, ActionType, Direction } from '@/types';
+import React, { useEffect, useRef } from 'react';
 import '../style.css';
+import { rotateXY, getCoordinates } from '../utils/functions';
+
 
 const Resizer = ({
   minWidth = 40,
@@ -9,12 +11,15 @@ const Resizer = ({
   isLocked,
   onRotateStart = () => { },
   onRotate = () => { },
-  onRotateEnd = () => { }
+  onRotateEnd = () => { },
+  onResize = () => { },
+  lockAspectRatio = false,
+  resizeFromCenter = false
 }: ResizerProps) => {
   const resizerRef = useRef<HTMLDivElement>(null);
   let targetRef = useRef<HTMLDivElement>(null);
-
-  const [styleValue, setStyleValue] = useState<IStyle>({
+  const resizerStartPosition = useRef({ x: 0, y: 0 });
+  const styleValueRef = useRef<IStyle>({
     width: style.width || minWidth,
     height: style.height || minHeight,
     left: style.left || 0,
@@ -23,20 +28,147 @@ const Resizer = ({
     transformOrigin: style.transformOrigin || 'center',
   })
 
-  const { width, height, left, top, angle, transformOrigin } = styleValue;
+  const { width, height, left, top, angle,transformOrigin } = styleValueRef.current;
 
   const handleMouseUp = (e: MouseEvent | TouchEvent) => {
     window.removeEventListener('mousemove', handleMouseMove);
     window.removeEventListener('mouseup', handleMouseUp);
     window.removeEventListener('touchmove', handleMouseMove);
     window.removeEventListener('touchend', handleMouseUp);
-    setStyleValue((prevStyle) => {
-      handleAction({
-        type: `${targetRef.current?.dataset.id}-end` as ActionType,
-        event: e,
-        style: prevStyle,
-      });
-      return prevStyle;
+    handleAction({
+      type: `${targetRef.current?.dataset.id}-end` as ActionType,
+      event: e,
+    });
+  }
+
+  const handleRotate = (e: MouseEvent | TouchEvent, centerX: number, clientX: number, centerY: number, clientY: number) => {
+    let newAngle = Math.atan2(centerX - clientX, -(centerY - clientY)) * (180 / Math.PI) - 180;
+    newAngle = newAngle >= 0 ? newAngle : 360 + newAngle;
+    styleValueRef.current = {
+      ...styleValueRef.current,
+      angle: newAngle
+    }
+    handleAction({
+      type: "rotate",
+      event: e
+    });
+  }
+
+  const handleResize = (
+    e: MouseEvent | TouchEvent,
+    x: number,
+    y: number,
+    direction: Direction
+  ) => {
+    let newWidth = width;
+    let newHeight = height;
+    let newTop = top;
+    let newLeft = left;
+
+    const setStyleValue = (newStyleValue: Partial<IStyle>) => {
+      styleValueRef.current = { ...styleValueRef.current, ...newStyleValue };
+      handleAction({ type: 'resize', event: e });
+    };
+
+    switch (direction) {
+      case 'right':
+        newWidth = width + x;
+        if (newWidth < minWidth) {
+          newWidth = minWidth;
+        }
+        break;
+      case 'left':
+        newLeft = left + x;
+        newWidth = width - x;
+        if (newWidth < minWidth) {
+          newLeft = left + width - minWidth;
+          newWidth = minWidth;
+        }
+        break;
+      case 'top':
+        newTop = top + y;
+        newHeight = height - y;
+        if (newHeight < minHeight) {
+          newTop = top + height - minHeight;
+          newHeight = minHeight;
+        }
+        break;
+      case 'bottom':
+        newHeight = height + y;
+        if (newHeight < minHeight) {
+          newHeight = minHeight;
+        }
+        break;
+      case 'top-right':
+        newTop = top + y;
+        newHeight = height - y;
+        newWidth = width + x;
+        if (newHeight < minHeight) {
+          newTop = top + height - minHeight;
+          newHeight = minHeight;
+        }
+        if (newWidth < minWidth) {
+          newWidth = minWidth;
+        }
+        if (lockAspectRatio) {
+          newWidth = newHeight * width / height;
+        }
+        break;
+      case 'top-left':
+        newWidth = width - x
+        newHeight = height - y
+        if (newWidth < minWidth) {
+          newWidth = minWidth;
+        }
+        if (newHeight < minHeight) {
+          newHeight = minHeight;
+        }
+        if (lockAspectRatio) {
+          let hr = height / width;
+          newHeight = newWidth * hr;
+        }
+        newTop = top + height - newHeight;
+        newLeft = left + width - newWidth;
+
+        break;
+      case 'bottom-right':
+        newWidth = width + x;
+        newHeight = height + y;
+        if (newWidth < minWidth) {
+          newWidth = minWidth;
+        }
+        if (newHeight < minHeight) {
+          newHeight = minHeight;
+        }
+        if (lockAspectRatio) {
+          let hr = height / width;
+          newHeight = newWidth * hr;
+        }
+        break;
+      case 'bottom-left':
+        newWidth = width - x;
+        newHeight = height + y;
+        if (newWidth < minWidth) {
+          newWidth = minWidth;
+        }
+        if (newHeight < minHeight) {
+          newHeight = minHeight;
+        }
+        if (lockAspectRatio) {
+          let hr = height / width;
+          newHeight = width * hr;
+        }
+        newLeft = left + width - newWidth;
+        break;
+      default:
+        break;
+    }
+
+    setStyleValue({
+      width: newWidth,
+      height: newHeight,
+      top: newTop,
+      left: newLeft,
     });
   }
 
@@ -47,33 +179,31 @@ const Resizer = ({
     const { clientX, clientY } = e instanceof MouseEvent ? e : e.touches[0];
     let centerX = left + width / 2;
     let centerY = top + height / 2;
-    let newAngle = angle;
+    let x = clientX - resizerStartPosition.current.x;
+    let y = clientY - resizerStartPosition.current.y;
 
     if (targetRef.current?.dataset.id === 'rotate') {
-      newAngle = Math.atan2(centerX - clientX, -(centerY - clientY)) * (180 / Math.PI) - 180;
-      newAngle = newAngle >= 0 ? newAngle : 360 + newAngle;
-      setStyleValue((prev) => ({
-        ...prev,
-        angle: newAngle,
-        transformOrigin: 'center',
-      }))
-      handleAction({
-        type: "rotate",
-        event: e,
-        style: {
-          ...styleValue,
-          angle: newAngle,
-          transformOrigin: 'center',
-        },
-      });
+      handleRotate(e, centerX, clientX, centerY, clientY);
+    } else {
+      handleResize(e, x, y, targetRef.current?.dataset.id as Direction)
     }
-  }
+  };
+
 
   const handleMouseDown = (e: MouseEvent | TouchEvent) => {
+    e.type === 'mousedown' && e.preventDefault();
     e.stopPropagation();
+
     if (e.target instanceof HTMLDivElement) {
       targetRef = { current: e.target }
     }
+
+    const { clientX, clientY } = e instanceof MouseEvent ? e : e.touches[0];
+
+    resizerStartPosition.current = {
+      x: clientX,
+      y: clientY,
+    };
 
     if (!isLocked) {
       window.addEventListener('mousemove', handleMouseMove);
@@ -82,13 +212,29 @@ const Resizer = ({
       window.addEventListener('touchend', handleMouseUp);
     }
 
-    setStyleValue((prevStyle) => {
-      handleAction({
-        type: `${targetRef.current?.dataset.id}-start` as ActionType,
-        event: e,
-        style: prevStyle,
-      });
-      return prevStyle;
+    if (angle > 0) {
+      if (resizerRef.current) {
+        const client = resizerRef.current.getBoundingClientRect();
+        let centerX = client.left + client.width / 2;
+        let centerY = client.top + client.height / 2;
+        const startPos = rotateXY(centerX, centerY, resizerStartPosition.current.x, resizerStartPosition.current.y, angle)
+
+        resizerStartPosition.current = {
+          x: startPos.x,
+          y: startPos.y,
+        };
+      }
+    }
+
+
+    if (angle > 0 && !resizeFromCenter) {
+      let coord = getCoordinates(styleValueRef.current, angle);
+      console.log('coord', coord);
+    }
+
+    handleAction({
+      type: `${targetRef.current?.dataset.id}-start` as ActionType,
+      event: e,
     });
   };
 
@@ -99,23 +245,23 @@ const Resizer = ({
       resizerRef.current?.removeEventListener('mousedown', handleMouseDown);
       resizerRef.current?.removeEventListener('touchstart', handleMouseDown);
     };
-  }, []);
+  }, [styleValueRef.current]);
+
 
 
   const handleAction = (action: IAction) => {
     switch (action.type) {
       case "rotate-start":
-        let styles = action.style || styleValue;
-        styles.transformOrigin = 'center';
-        onRotateStart(action.event, styles)
+        onRotateStart(action.event)
         break;
       case "rotate":
-        onRotate(action.event, action.style || styleValue)
+        onRotate(action.event, styleValueRef.current)
         break;
       case "rotate-end":
-        styles = action.style || styleValue;
-        styles.transformOrigin = `${width / 2}px ${height / 2}px`;
-        onRotateEnd(action.event, styles);
+        onRotateEnd(action.event, styleValueRef.current);
+        break;
+      case "resize":
+        onResize(action.event, styleValueRef.current)
         break;
       default:
         break;
@@ -134,18 +280,41 @@ const Resizer = ({
       }}
         className='resizer-container'
         ref={resizerRef}>
-        <div className='resizer-border' />
-        <div className='handler-top' />
-        <div className='handler-bottom' />
-        <div className='handler-right' />
-        <div className='handler-left' />
-        <div className='handler-top-right' />
-        <div className='handler-top-left' />
+        <div
+          className='resizer-border'
+          data-id="border"
+        />
+        <div
+          className='handler-top'
+          data-id="top"
+        />
+        <div
+          className='handler-bottom'
+          data-id="bottom"
+        />
+        <div
+          className='handler-right'
+          data-id="right"
+        />
+        <div
+          className='handler-left'
+          data-id="left"
+        />
+        <div
+          className='handler-top-right'
+          data-id="top-right"
+        />
+        <div
+          className='handler-top-left'
+          data-id="top-left"
+        />
         <div
           className='handler-bottom-right'
+          data-id="bottom-right"
         />
         <div
           className='handler-bottom-left'
+          data-id="bottom-left"
         />
         <div
           className='handler-rotate'
