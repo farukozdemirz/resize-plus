@@ -3,11 +3,11 @@ import React, { useState } from 'react'
 
 const ResizerWrapper = () => {
   const [style, setStyle] = useState({
-    width: 200,
-    height: 200,
+    width: 300,
+    height: 300,
     left: 300,
-    top: 200,
-    angle: 0,
+    top: 300,
+    angle: 20,
   })
   const { width, height, left, top, angle } = style
   return (

@@ -1,6 +1,8 @@
 import { ResizerProps, IStyle, IAction, ActionType, Direction } from '@/types';
 import React, { useEffect, useRef } from 'react';
 import '../style.css';
+import { rotateXY, getCoordinates } from '../utils/functions';
+
 
 const Resizer = ({
   minWidth = 40,
@@ -12,6 +14,7 @@ const Resizer = ({
   onRotateEnd = () => { },
   onResize = () => { },
   lockAspectRatio = false,
+  resizeFromCenter = false
 }: ResizerProps) => {
   const resizerRef = useRef<HTMLDivElement>(null);
   let targetRef = useRef<HTMLDivElement>(null);
@@ -206,6 +209,25 @@ const Resizer = ({
       window.addEventListener('mouseup', handleMouseUp);
       window.addEventListener('touchmove', handleMouseMove);
       window.addEventListener('touchend', handleMouseUp);
+    }
+
+    if (angle > 0) {
+      if (resizerRef.current) {
+        const client = resizerRef.current.getBoundingClientRect();
+        let centerX = client.left + client.width / 2;
+        let centerY = client.top + client.height / 2;
+        const startPos = rotateXY(centerX, centerY, resizerStartPosition.current.x, resizerStartPosition.current.y, angle)
+
+        resizerStartPosition.current = {
+          x: startPos.x,
+          y: startPos.y,
+        };
+      }
+    }
+
+    if (angle > 0 && !resizeFromCenter) {
+      let coord = getCoordinates(styleValueRef.current, angle);
+      console.log('coord', coord);
     }
 
     handleAction({

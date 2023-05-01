@@ -5,9 +5,7 @@ const meta = {
   title: 'Example/Resizer',
   component: ResizerWrapper,
   tags: ['autodocs'],
-  parameters: {
-    layout: 'fullscreen',
-  },
+  
 } satisfies Meta<typeof ResizerWrapper>;
 
 export default meta;
