@@ -8,12 +8,13 @@ const ResizerWrapper = () => {
     left: 300,
     top: 300,
     angle: 20,
+    transformOrigin: 'center',
   })
-  const { width, height, left, top, angle } = style
+  const { width, height, left, top, angle, transformOrigin } = style
   return (
     <>
       <Resizer
-        style={style}
+       style={style}
         onRotateStart={(e) => { }}
         onRotateEnd={(e) => { }}
         onRotate={(e, newStyle) => {
@@ -32,6 +33,7 @@ const ResizerWrapper = () => {
           left,
           top,
           transform: `rotate(${angle}deg)`,
+          transformOrigin,
           background: '#000',
         }}
       >

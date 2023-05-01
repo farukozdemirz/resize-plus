@@ -25,9 +25,10 @@ const Resizer = ({
     left: style.left || 0,
     top: style.top || 0,
     angle: style.angle || 0,
+    transformOrigin: style.transformOrigin || 'center',
   })
 
-  const { width, height, left, top, angle } = styleValueRef.current;
+  const { width, height, left, top, angle,transformOrigin } = styleValueRef.current;
 
   const handleMouseUp = (e: MouseEvent | TouchEvent) => {
     window.removeEventListener('mousemove', handleMouseMove);
@@ -225,6 +226,7 @@ const Resizer = ({
       }
     }
 
+
     if (angle > 0 && !resizeFromCenter) {
       let coord = getCoordinates(styleValueRef.current, angle);
       console.log('coord', coord);
@@ -244,6 +246,7 @@ const Resizer = ({
       resizerRef.current?.removeEventListener('touchstart', handleMouseDown);
     };
   }, [styleValueRef.current]);
+
 
 
   const handleAction = (action: IAction) => {
@@ -273,6 +276,7 @@ const Resizer = ({
         left,
         top,
         transform: `rotate(${angle}deg)`,
+        transformOrigin,
       }}
         className='resizer-container'
         ref={resizerRef}>

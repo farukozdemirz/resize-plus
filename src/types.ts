@@ -14,6 +14,7 @@ export interface IStyle {
   left: number;
   top: number;
   angle: number;
+  transformOrigin: string;
 }
 export interface ResizerProps {
   minWidth?: number;
@@ -23,8 +24,8 @@ export interface ResizerProps {
   lockAspectRatio?: boolean;
   onResizeStart?: () => void;
   onResizeEnd?: () => void;
+  onRotateStart?: (e: MouseEvent | TouchEvent, style: IStyle) => void;
   onResize?: (e: MouseEvent | TouchEvent, style: IStyle) => void;
-  onRotateStart?: (e: MouseEvent | TouchEvent) => void;
   onRotateEnd?: (e: MouseEvent | TouchEvent, style: IStyle) => void;
   onRotate?: (e: MouseEvent | TouchEvent, style: IStyle) => void;
   isHideOnResize?: boolean;
