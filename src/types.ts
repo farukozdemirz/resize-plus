@@ -25,7 +25,7 @@ export interface ResizerProps {
   onResizeStart?: () => void;
   onResizeEnd?: () => void;
   onResize?: () => void;
-  onRotateStart?: (e: MouseEvent | TouchEvent) => void;
+  onRotateStart?: (e: MouseEvent | TouchEvent, style: IStyle) => void;
   onRotateEnd?: (e: MouseEvent | TouchEvent, style: IStyle) => void;
   onRotate?: (e: MouseEvent | TouchEvent, style: IStyle) => void;
   isHideOnResize?: boolean;

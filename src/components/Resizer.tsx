@@ -55,7 +55,7 @@ const Resizer = ({
       setStyleValue((prev) => ({
         ...prev,
         angle: newAngle,
-        transformOrigin: `${width / 2}px ${height / 2}px`,
+        transformOrigin: 'center',
       }))
       handleAction({
         type: "rotate",
@@ -63,7 +63,7 @@ const Resizer = ({
         style: {
           ...styleValue,
           angle: newAngle,
-          transformOrigin: `${width / 2}px ${height / 2}px`,
+          transformOrigin: 'center',
         },
       });
     }
@@ -82,9 +82,13 @@ const Resizer = ({
       window.addEventListener('touchend', handleMouseUp);
     }
 
-    handleAction({
-      type: `${targetRef.current?.dataset.id}-start` as ActionType,
-      event: e,
+    setStyleValue((prevStyle) => {
+      handleAction({
+        type: `${targetRef.current?.dataset.id}-start` as ActionType,
+        event: e,
+        style: prevStyle,
+      });
+      return prevStyle;
     });
   };
 
@@ -101,14 +105,16 @@ const Resizer = ({
   const handleAction = (action: IAction) => {
     switch (action.type) {
       case "rotate-start":
-        onRotateStart(action.event)
+        let styles = action.style || styleValue;
+        styles.transformOrigin = 'center';
+        onRotateStart(action.event, styles)
         break;
       case "rotate":
-        const style = action.style || styleValue;
-        onRotate(action.event, style)
+        onRotate(action.event, action.style || styleValue)
         break;
       case "rotate-end":
-        const styles = action.style || styleValue;
+        styles = action.style || styleValue;
+        styles.transformOrigin = `${width / 2}px ${height / 2}px`;
         onRotateEnd(action.event, styles);
         break;
       default:

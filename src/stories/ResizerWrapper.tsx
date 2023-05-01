@@ -15,11 +15,9 @@ const ResizerWrapper = () => {
     <>
       <Resizer
         style={style}
-        onRotateStart={(e) => { }}
-        onRotateEnd={(e) => { }}
-        onRotate={(e, newStyle) => {
-          setStyle(newStyle)
-        }}
+        onRotateStart={(e, newStyle) => { setStyle(newStyle) }}
+        onRotateEnd={(e, newStyle) => { setStyle(newStyle) }}
+        onRotate={(e, newStyle) => { setStyle(newStyle) }}
         isLocked={false}
       />
       <div
