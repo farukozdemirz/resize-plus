@@ -14,7 +14,7 @@ export interface IStyle {
   left: number;
   top: number;
   angle: number;
-  transformOrigin: string;
+  transformOrigin?: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left' | 'center' | '';
 }
 export interface ResizerProps {
   minWidth?: number;
@@ -22,8 +22,8 @@ export interface ResizerProps {
   aspectRatio?: string;
   resizeFromCenter?: boolean;
   lockAspectRatio?: boolean;
-  onResizeStart?: () => void;
-  onResizeEnd?: () => void;
+  onResizeStart?: (e: MouseEvent | TouchEvent, style: IStyle) => void;
+  onResizeEnd?: (e: MouseEvent | TouchEvent, style: IStyle) => void;
   onRotateStart?: (e: MouseEvent | TouchEvent, style: IStyle) => void;
   onResize?: (e: MouseEvent | TouchEvent, style: IStyle) => void;
   onRotateEnd?: (e: MouseEvent | TouchEvent, style: IStyle) => void;
@@ -35,6 +35,7 @@ export interface ResizerProps {
   style: IStyle;
   zoom?: number;
   isLocked?: boolean;
+  targetRef: React.RefObject<HTMLDivElement>;
 }
 
 export type ActionType = "rotate-start" | "rotate" | "rotate-end" | "resize-start" | "resize" | "resize-end";
@@ -42,4 +43,18 @@ export interface IAction {
   type: ActionType;
   event: MouseEvent | TouchEvent;
 }
-export type Direction = 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | "bottom-right" | "bottom-left";
+export type Direction = 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | "bottom-right" | "bottom-left" | 'rotate';
+export type TransformOrigin = 'TopLeft' | 'TopRight' | 'BottomRight' | 'BottomLeft';
+
+export interface ICoordinates {
+  rotatedTopLeftX: number;
+  rotatedTopLeftY: number;
+  rotatedTopRightX: number;
+  rotatedTopRightY: number;
+  rotatedBottomRightX: number;
+  rotatedBottomRightY: number;
+  rotatedBottomLeftX: number;
+  rotatedBottomLeftY: number;
+  centerX: number;
+  centerY: number;
+}

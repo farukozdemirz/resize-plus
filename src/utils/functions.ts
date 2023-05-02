@@ -1,4 +1,4 @@
-import { IStyle } from "@/types";
+import { Direction, ICoordinates, IStyle, TransformOrigin } from "@/types";
 
 export const rotateXY = (centerX: number, centerY: number, startX: number, startY: number, angle: number) => {
   let radians = (Math.PI / 180) * angle,
@@ -56,3 +56,212 @@ export const getCoordinates = (size: IStyle, angle: number) => {
     centerY
   };
 };
+
+
+export const handleDomStyle = (
+  targetElement: React.RefObject<HTMLDivElement>,
+  resizerElement: React.RefObject<HTMLDivElement>,
+  styleValue: IStyle
+) => {
+  const { left, top, transformOrigin } = styleValue;
+  const { current: target } = targetElement;
+  const { current: resizer } = resizerElement;
+
+  if (target && resizer) {
+    target.style.left = `${left}px`;
+    target.style.top = `${top}px`;
+    target.style.transformOrigin = `${transformOrigin}`;
+    resizer.style.left = `${left}px`;
+    resizer.style.top = `${top}px`;
+    resizer.style.transformOrigin = `${transformOrigin}`;
+  }
+}
+
+export const adjustRotate = (newSize: IStyle, oldSize: IStyle, transformOrigin: TransformOrigin) => {
+  let s1 = getCoordinates(oldSize, newSize.angle);
+  let s2 = getCoordinates(newSize, newSize.angle);
+
+  let newX = 0;
+  let newY = 0;
+
+  switch (transformOrigin) {
+    case 'TopLeft':
+      newX = newSize.left + s1.rotatedTopLeftX - s2.rotatedTopLeftX;
+      newY = newSize.top + s1.rotatedTopLeftY - s2.rotatedTopLeftY;
+      break;
+    case 'TopRight':
+      newX = newSize.left + s1.rotatedTopRightX - s2.rotatedTopRightX;
+      newY = newSize.top + s1.rotatedTopRightY - s2.rotatedTopRightY;
+      break;
+    case 'BottomRight':
+      newX = newSize.left + s1.rotatedBottomRightX - s2.rotatedBottomRightX;
+      newY = newSize.top + s1.rotatedBottomRightY - s2.rotatedBottomRightY;
+      break;
+    case 'BottomLeft':
+      newX = newSize.left + s1.rotatedBottomLeftX - s2.rotatedBottomLeftX;
+      newY = newSize.top + s1.rotatedBottomLeftY - s2.rotatedBottomLeftY;
+      break;
+    default:
+      newX = newSize.left + s1.rotatedTopLeftX - s2.rotatedTopLeftX;
+      newY = newSize.top + s1.rotatedTopLeftY - s2.rotatedTopLeftY;
+      break;
+  }
+
+  return {
+    x: newX,
+    y: newY,
+  };
+}
+interface IBoxSizePosition {
+  width: number;
+  height: number;
+  top: number;
+  left: number;
+}
+interface IMinimumSize {
+  minWidth: number;
+  minHeight: number;
+}
+
+export const calculateResizeByDirection = (direction: Direction, { width, height, top, left }: IBoxSizePosition, { minWidth, minHeight }: IMinimumSize, { x, y }: { x: number, y: number }, lockAspectRatio: boolean
+): IBoxSizePosition => {
+  let newWidth = width;
+  let newHeight = height;
+  let newTop = top;
+  let newLeft = left;
+
+  switch (direction) {
+    case 'right':
+      newWidth = width + x;
+      if (newWidth < minWidth) {
+        newWidth = minWidth;
+      }
+      break;
+    case 'left':
+      newLeft = left + x;
+      newWidth = width - x;
+      if (newWidth < minWidth) {
+        newLeft = left + width - minWidth;
+        newWidth = minWidth;
+      }
+      break;
+    case 'top':
+      newTop = top + y;
+      newHeight = height - y;
+      if (newHeight < minHeight) {
+        newTop = top + height - minHeight;
+        newHeight = minHeight;
+      }
+      break;
+    case 'bottom':
+      newHeight = height + y;
+      if (newHeight < minHeight) {
+        newHeight = minHeight;
+      }
+      break;
+    case 'top-right':
+      newTop = top + y;
+      newHeight = height - y;
+      newWidth = width + x;
+      if (newHeight < minHeight) {
+        newTop = top + height - minHeight;
+        newHeight = minHeight;
+      }
+      if (newWidth < minWidth) {
+        newWidth = minWidth;
+      }
+      if (lockAspectRatio) {
+        newWidth = newHeight * width / height;
+      }
+      break;
+    case 'top-left':
+      newWidth = width - x
+      newHeight = height - y
+      if (newWidth < minWidth) {
+        newWidth = minWidth;
+      }
+      if (newHeight < minHeight) {
+        newHeight = minHeight;
+      }
+      if (lockAspectRatio) {
+        let hr = height / width;
+        newHeight = newWidth * hr;
+      }
+      newTop = top + height - newHeight;
+      newLeft = left + width - newWidth;
+
+      break;
+    case 'bottom-right':
+      newWidth = width + x;
+      newHeight = height + y;
+      if (newWidth < minWidth) {
+        newWidth = minWidth;
+      }
+      if (newHeight < minHeight) {
+        newHeight = minHeight;
+      }
+      if (lockAspectRatio) {
+        let hr = height / width;
+        newHeight = newWidth * hr;
+      }
+      break;
+    case 'bottom-left':
+      newWidth = width - x;
+      newHeight = height + y;
+      if (newWidth < minWidth) {
+        newWidth = minWidth;
+      }
+      if (newHeight < minHeight) {
+        newHeight = minHeight;
+      }
+      if (lockAspectRatio) {
+        let hr = height / width;
+        newHeight = width * hr;
+      }
+      newLeft = left + width - newWidth;
+      break;
+    default:
+      break;
+  }
+
+  return {
+    width: newWidth,
+    height: newHeight,
+    top: newTop,
+    left: newLeft
+  }
+}
+export const calculateResizeByDirectionWithAngle = (sizes: IBoxSizePosition, direction: Direction, coordinates: ICoordinates): IBoxSizePosition => {
+  let { width, height, top, left } = sizes;
+  switch (direction) {
+    case 'bottom-right':
+    case 'bottom':
+    case 'right':
+      left = coordinates.rotatedTopLeftX;
+      top = coordinates.rotatedTopLeftY;
+      break;
+    case 'bottom-left':
+    case 'left':
+      left = coordinates.rotatedTopRightX - width;
+      top = coordinates.rotatedTopRightY;
+      break;
+    case 'top-left':
+    case 'top':
+      left = coordinates.rotatedBottomRightX - width;
+      top = coordinates.rotatedBottomRightY - height;
+      break;
+    case 'top-right':
+      left = coordinates.rotatedBottomLeftX;
+      top = coordinates.rotatedBottomLeftY - height;
+      break;
+    default:
+      break;
+  }
+
+  return {
+    left,
+    top,
+    width,
+    height
+  }
+}

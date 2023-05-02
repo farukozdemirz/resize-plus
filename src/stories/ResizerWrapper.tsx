@@ -1,5 +1,5 @@
 import Resizer from '../components/Resizer';
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 
 const ResizerWrapper = () => {
   const [style, setStyle] = useState({
@@ -8,12 +8,13 @@ const ResizerWrapper = () => {
     left: 300,
     top: 300,
     angle: 0,
-    transformOrigin: 'center',
   })
-  const { width, height, left, top, angle, transformOrigin } = style
+  const { width, height, left, top, angle } = style
+  const targetRef = useRef(null);
   return (
     <>
       <Resizer
+        targetRef={targetRef}
         style={style}
         onRotateStart={(e) => { }}
         onRotateEnd={(e) => { }}
@@ -26,6 +27,7 @@ const ResizerWrapper = () => {
         isLocked={false}
       />
       <div
+        ref={targetRef}
         style={{
           position: 'absolute',
           width,
@@ -33,7 +35,6 @@ const ResizerWrapper = () => {
           left,
           top,
           transform: `rotate(${angle}deg)`,
-          transformOrigin,
           background: '#000',
         }}
       >
